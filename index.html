@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Trab de CG</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				font-family: Monospace;
+				background-color: #000;
+				color: #fff;
+				margin: 0px;
+				overflow: hidden;
+			}
+			#info {
+				color: #fff;
+				position: absolute;
+				top: 10px;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+			}
+			#info a, .button { color: #f00; font-weight: bold; text-decoration: underline; cursor: pointer }
+		</style>
+	</head>
+
+	<body>
+    <!--importando os .js importantes-->
+		<div id="stats"></div>
+    <script src="three/Three.js"></script>
+		<script src="three/ShaderMaterial.js"></script>
+		<script src="three/WebGLShader.js"></script>
+    <script src="three/KeyboardState.js"></script>
+		<script src="three/THREEx.KeyboardState.js"></script>
+		<script src="three/Stats.js"></script>
+		<script src="three/Detector.js"></script>
+		<script src="three/OBJLoader.js"></script>
+		<script src="three/MTLLoader.js"></script>
+		<script src="three/TextureLoader.js"></script>
+
+		<script type="x-shader/-xvertex" id="vertexShader">
+
+			varying vec3 normalInterp;
+			varying vec3 vertPos;
+
+		void main(){
+		    gl_Position = projectionMatrix* modelViewMatrix * vec4(position, 1.0);
+		    vec4 vertPos4 = modelViewMatrix * vec4(position, 1.0);
+		    vertPos = vec3(vertPos4) / vertPos4.w;
+		    normalInterp = vec3(normalMatrix * normal);
+		}
+		</script>
+
+		<script type = "x-shader/x-fragment" id = "fragmentShaderSun">
+		precision mediump float;
+
+		varying vec3 normalInterp;
+		varying vec3 vertPos;
+
+		const vec3 lightPos = vec3(0, 7, 0);
+		const vec3 ambientColor = vec3(0.6, 0.3, 0.0);
+		const vec3 diffuseColor = vec3(0.9, 0.7, 0.0);
+		const vec3 specColor = vec3(1.0, 1.0, 0.3);
+
+		void main() {
+			vec3 normal = normalize(normalInterp);
+			vec3 lightDir = normalize(lightPos - vertPos);
+			vec3 reflectDir = reflect(-lightDir, normal);
+			vec3 viewDir = normalize(-vertPos);
+
+			float lambertian = max(dot(lightDir,normal), 0.0);
+			float specular = 0.0;
+
+			if(lambertian > 0.0) {
+				 float specAngle = max(dot(reflectDir, viewDir), 0.0);
+				 specular = pow(specAngle, 4.0);
+			}
+			gl_FragColor = vec4(ambientColor + lambertian*diffuseColor +	specular*specColor, 1.0);
+		}
+		</script>
+		<script type = "x-shader/x-fragment" id = "fragmentShaderRubi">
+		precision mediump float;
+
+		varying vec3 normalInterp;
+		varying vec3 vertPos;
+
+		const vec3 lightPos = vec3(0, 7, 0);
+		const vec3 ambientColor = vec3(0.3, 0.0, 0.0);
+		const vec3 diffuseColor = vec3(0.9, 0.0, 0.0);
+		const vec3 specColor = vec3(1.0, 1.0, 1.0);
+
+		void main() {
+			vec3 normal = normalize(normalInterp);
+			vec3 lightDir = normalize(lightPos - vertPos);
+			vec3 reflectDir = reflect(-lightDir, normal);
+			vec3 viewDir = normalize(-vertPos);
+
+			float lambertian = max(dot(lightDir,normal), 0.0);
+			float specular = 0.0;
+
+			if(lambertian > 0.0) {
+				 float specAngle = max(dot(reflectDir, viewDir), 0.0);
+				 specular = pow(specAngle, 4.0);
+			}
+			gl_FragColor = vec4(ambientColor + lambertian*diffuseColor +	specular*specColor, 1.0);
+		}
+		</script>
+
+		<script type = "x-shader/x-fragment" id = "fragmentShaderDragon">
+		precision mediump float;
+
+		varying vec3 normalInterp;
+		varying vec3 vertPos;
+
+		const vec3 lightPos = vec3(0, 7, 0);
+		const vec3 ambientColor = vec3(0.5, 0.5, 0.3);
+		const vec3 diffuseColor = vec3(0.5, 0.5, 0.5);
+		const vec3 specColor = vec3(0.8, 0.8, 0.8);
+
+		void main() {
+			vec3 normal = normalize(normalInterp);
+			vec3 lightDir = normalize(lightPos - vertPos);
+			vec3 reflectDir = reflect(-lightDir, normal);
+			vec3 viewDir = normalize(-vertPos);
+
+			float lambertian = max(dot(lightDir,normal), 0.0);
+			float specular = 0.0;
+
+			if(lambertian > 0.0) {
+				 float specAngle = max(dot(reflectDir, viewDir), 0.0);
+				 specular = pow(specAngle, 4.0);
+			}
+			gl_FragColor = vec4(ambientColor + lambertian*diffuseColor +	specular*specColor, 1.0);
+		}
+		</script>
+
+		<script>
+			var scene, renderer, container, stats;
+			var topCamera, chaseCamera, camera2ativa = false;
+			var floor, floorGeometry, floorTexture, floorMaterial;
+			var zelda, borboleta, sun;
+			var keyboard = new THREEx.KeyboardState();
+			var clock = new THREE.Clock();
+			var borboletaAux = new THREE.Object3D();
+			var rubi0, rubi1;
+			var timestamp;
+
+			init();
+			animate();
+
+			function init() {
+
+				// cria a cena
+				scene = new THREE.Scene();
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+				// CAMERAS
+				var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+				var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+				// camera 1
+				topCamera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+				scene.add(topCamera);
+				topCamera.position.set(0,200,550);
+				topCamera.lookAt(scene.position);
+				// camera 2
+				chaseCamera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+				scene.add(chaseCamera);
+
+				// renderer
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+				container.appendChild( renderer.domElement );
+			  window.addEventListener( 'resize', onWindowResize, false );
+
+				stats = new Stats();
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.bottom = '0px';
+				stats.domElement.style.zIndex = 100;
+				container.appendChild( stats.domElement );
+				// LIGHT
+
+
+				var light = new THREE.PointLight(0xffffff);
+				light.position.set(0,250,0);
+				scene.add(light);
+
+				var ambient = new THREE.AmbientLight( 0x444444 );
+				scene.add( ambient );
+
+				var sunGeometry = new THREE.SphereGeometry(1000, 100, 100);
+				var material = new THREE.ShaderMaterial({
+					vertexShader: document.getElementById('vertexShader').textContent,
+					fragmentShader: document.getElementById('fragmentShaderSun').textContent
+				});
+				sun = new THREE.Mesh(sunGeometry, material);
+				scene.add(sun);
+				sun.position.set(0,0,-5000);
+
+				// FLOOR
+
+				floorTexture = new THREE.TextureLoader().load( 'images/grass.jpg' );
+				floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
+				floorTexture.needsUpdate = true;
+				floorTexture.repeat.set(3000,3000);
+				floorMaterial = new THREE.MeshBasicMaterial({map : floorTexture, side: THREE.DoubleSide});
+				floorGeometry = new THREE.PlaneGeometry(100000, 100000,100,100);
+				floor = new THREE.Mesh(floorGeometry, floorMaterial);
+			  floor.side= THREE.DoubleSide;
+				floor.position.y = -10;
+				floor.rotation.x = Math.PI / 2;
+				scene.add(floor);
+
+				// SKYBOX/FOG
+
+				var skyBoxGeometry = new THREE.BoxGeometry( 10000, 10000, 10000 );
+				var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
+				var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
+				scene.add(skyBox);
+
+				//statua dragao
+
+				var phongShader = THREE.ShaderLib.phong;
+				var mUniforms = THREE.UniformsUtils.clone(phongShader.uniforms);
+
+				var dragonMaterial = new THREE.ShaderMaterial({
+					uniforms: mUniforms,
+					vertexShader: document.getElementById('vertexShader').textContent,
+					fragmentShader:document.getElementById('fragmentShaderDragon').textContent,
+					lights: true
+				})
+
+				var geometrycube = new THREE.BoxGeometry(70, 25, 70*2);
+				var cube = new THREE.Mesh(geometrycube, dragonMaterial);
+				cube.position.set(5,0,-160);
+				scene.add(cube);
+
+				var loader = new THREE.OBJLoader();
+				loader.load('Dragon.obj',
+			 		function(object){
+						object.traverse(function (child) {
+								if (child instanceof THREE.Mesh) {
+										child.material = dragonMaterial;
+								}
+						});
+					object.position.set(0, 75.1, -300);
+					scene.add(object);
+					})
+
+				// loader da zelda
+				// muda alguns atributos e insere na scene
+				var mtlLoader = new THREE.MTLLoader();
+				mtlLoader.load(
+					'posed.mtl',
+					function(materials){
+						materials.preload();
+						var objLoader = new THREE.OBJLoader();
+						objLoader.setMaterials(materials);
+						objLoader.load(
+							'posed.obj',
+							function(object) {
+								var zeldaMatrix = new THREE.Matrix4().makeTranslation(0,-10,0);
+								zeldaMatrix.multiply(new THREE.Matrix4().makeScale(1,1,1));
+								object.position.set(0, 25.1, 0);
+								object.applyMatrix(zeldaMatrix);
+								object.rotation.y = Math.PI;
+								zelda = object;
+								scene.add(zelda);
+							}
+						);
+					}
+				);
+
+				//shader dos rubi
+
+				var RubiMaterial = new THREE.ShaderMaterial({
+					uniforms: mUniforms,
+					vertexShader: document.getElementById('vertexShader').textContent,
+					fragmentShader: document.getElementById('fragmentShaderRubi').textContent,
+					lights: true
+				});
+
+				//começa a carregar os rubi
+
+				var mtlLoader = new THREE.MTLLoader();
+				mtlLoader.load(
+					'Rubis_Zelda.mtl',
+					function(materials){
+						materials.preload();
+						var objLoader = new THREE.OBJLoader();
+						objLoader.setMaterials(materials);
+						objLoader.load(
+							'Rubis_Zelda.obj',
+							function(object) {
+								object.traverse(function (child) {
+	                  if (child instanceof THREE.Mesh) {
+	                      child.material = RubiMaterial;
+	                  }
+	              });
+								object.position.set(100, 25.1, 0);
+								object.rotation.y = Math.PI;
+								object.scale.set(0.25,0.25,0.25);
+								rubi0 = object;
+								scene.add(rubi0);
+							}
+						);
+					}
+				);
+
+				var mtlLoader = new THREE.MTLLoader();
+				mtlLoader.load(
+					'Rubis_Zelda.mtl',
+					function(materials){
+						materials.preload();
+						var objLoader = new THREE.OBJLoader();
+						objLoader.setMaterials(materials);
+						objLoader.load(
+							'Rubis_Zelda.obj',
+							function(object) {
+								object.traverse(function (child) {
+	                  if (child instanceof THREE.Mesh) {
+	                      child.material = RubiMaterial;
+	                  }
+	              });
+								object.position.set(120, 25.1, 140);
+								object.rotation.y = Math.PI;
+								object.scale.set(0.25,0.25,0.25);
+								rubi1 = object;
+								scene.add(rubi1);
+							}
+						);
+					}
+				);
+
+				//loader da borboleta da zelda
+
+				var mtlLoader = new THREE.MTLLoader();
+				mtlLoader.load(
+					'Pierisrapae.mtl',
+					function(materials){
+						materials.preload();
+						var objLoader = new THREE.OBJLoader();
+						objLoader.setMaterials(materials);
+						objLoader.load(
+							'Pierisrapae.obj',
+							function(object) {
+								var borboletaMatrix = new THREE.Matrix4().makeTranslation(100,20,0);
+								borboletaMatrix.multiply(new THREE.Matrix4().makeScale(1,1,1));
+								object.position.set(100, 25.1, 0);
+								object.applyMatrix(borboletaMatrix);
+								object.rotation.y = Math.PI;
+
+								object.scale.set(0.75,0.75,0.75);
+								borboleta = object;
+								borboleta.position.x = 2;
+								borboleta.position.z = 15;
+								borboletaAux.add(borboleta);
+							}
+						);
+					}
+				);
+				scene.add(borboletaAux);
+				//luz ambiente
+				var ambientlight = new THREE.AmbientLight(0x111111);
+				scene.add( ambientlight );
+			}
+			function onWindowResize() {
+				topCamera.aspect = window.innerWidth / window.innerHeight;
+				topCamera.updateProjectionMatrix();
+				chaseCamera.aspect = window.innerWidth / window.innerHeight;
+				chaseCamera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+
+			function animate() {
+				requestAnimationFrame( animate );
+				render();
+				update();
+			}
+
+			function update()
+			{
+
+				var delta = clock.getDelta(); // seconds.
+				var moveDistance = 100 * delta; // 200 pixels per second
+				var rotateAngle = Math.PI * delta;   // pi/2 radians (90 degrees) per second
+
+				// local transformations
+				// move forwards/backwards/left/right
+				if ( keyboard.pressed("S") )
+					zelda.translateZ( -moveDistance );
+				if ( keyboard.pressed("W") )
+					zelda.translateZ(  moveDistance );
+				if ( keyboard.pressed("Q") )
+					zelda.translateX( moveDistance );
+				if ( keyboard.pressed("E") )
+					zelda.translateX(  -moveDistance );
+				// rotate left/right/up/down
+				var rotation_matrix = new THREE.Matrix4().identity();
+				if ( keyboard.pressed("A") )
+					zelda.rotateOnAxis( new THREE.Vector3(0,1,0), rotateAngle);
+				if ( keyboard.pressed("D") )
+					zelda.rotateOnAxis( new THREE.Vector3(0,1,0), -rotateAngle);
+				if ( keyboard.pressed("Z") )
+				{
+					zelda.position.set(0,-10,0);
+					zelda.rotation.set(0,0,0);
+				}
+
+				//muda a posição da camera que segue a zelda
+				var relativeCameraOffset = new THREE.Vector3(0,35,-130);
+				var cameraOffset = relativeCameraOffset.applyMatrix4( zelda.matrixWorld );
+				chaseCamera.position.x = cameraOffset.x;
+				chaseCamera.position.y = cameraOffset.y;
+				chaseCamera.position.z = cameraOffset.z;
+				chaseCamera.lookAt( zelda.position );
+
+				//muda a posição da borboleta q segue a zelda
+				borboletaAux.position.x = zelda.position.x;
+				borboletaAux.position.y = zelda.position.y;
+				borboletaAux.position.z = zelda.position.z;
+
+				//faz a borboleta rodar em volta da zelda e dela mesma
+				borboleta.rotation.z += 0.15;
+				borboleta.rotation.x = Math.PI;
+				borboletaAux.rotation.y += 0.015;
+
+				//mexendo com rubis
+				var rubysobedesce = 3 * Math.cos(0.0025 * Date.now());
+				var rubyroda = 0.05
+
+				//rubi0
+				rubi0.rotation.y += rubyroda;
+				rubi0.position.y = rubysobedesce;
+				if (zelda.position.distanceTo(rubi0.position) <= 12.5 ){
+					scene.remove(rubi0);
+				}
+
+				//rubi1
+				rubi1.rotation.y += rubyroda;
+				rubi1.position.y = rubysobedesce;
+				if (zelda.position.distanceTo(rubi1.position) <= 12.5 ){
+					scene.remove(rubi1);
+				}
+
+				//cabo os rubi
+
+				if ( keyboard.pressed("1") )
+				{  camera2ativa = true;  }
+				if ( keyboard.pressed("2") )
+				{  camera2ativa = false;  }
+
+				stats.update();
+
+			}
+			function render() {
+				if(camera2ativa)
+					renderer.render( scene, chaseCamera );
+				else
+					renderer.render( scene, topCamera );
+			}
+		</script>
+	</body>
+</html>
