@@ -28,10 +28,10 @@
 	<body>
     <!--importando os .js importantes-->
 		<div id="stats"></div>
-    <script src="three/Three.js"></script>
+    	<script src="three/Three.js"></script>
 		<script src="three/ShaderMaterial.js"></script>
 		<script src="three/WebGLShader.js"></script>
-    <script src="three/KeyboardState.js"></script>
+    	<script src="three/KeyboardState.js"></script>
 		<script src="three/THREEx.KeyboardState.js"></script>
 		<script src="three/Stats.js"></script>
 		<script src="three/Detector.js"></script>
@@ -137,9 +137,9 @@
 
 		<script>
 			var scene, renderer, container, stats;
-			var topCamera, chaseCamera, camera2ativa = false;
+			var fprincessCamera, zeldaCamera, camera2ativa = false;
 			var floor, floorGeometry, floorTexture, floorMaterial;
-			var zelda, borboleta, sun;
+			var zelda, fprincess, borboleta, sun;
 			var keyboard = new THREEx.KeyboardState();
 			var clock = new THREE.Clock();
 			var borboletaAux = new THREE.Object3D();
@@ -159,19 +159,20 @@
 				var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 				var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 				// camera 1
-				topCamera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
-				scene.add(topCamera);
-				topCamera.position.set(0,200,550);
-				topCamera.lookAt(scene.position);
+				fprincessCamera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+				scene.add(fprincessCamera);
+				fprincessCamera.position.set(0,200,550);
+				fprincessCamera.lookAt(scene.position);
 				// camera 2
-				chaseCamera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
-				scene.add(chaseCamera);
+				zeldaCamera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+				scene.add(zeldaCamera);
 
 				// renderer
 				renderer = new THREE.WebGLRenderer();
 				renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 				container.appendChild( renderer.domElement );
-			  window.addEventListener( 'resize', onWindowResize, false );
+				renderer.autoClear = false;
+				window.addEventListener( 'resize', onWindowResize, false );
 
 				stats = new Stats();
 				stats.domElement.style.position = 'absolute';
@@ -206,7 +207,7 @@
 				floorMaterial = new THREE.MeshBasicMaterial({map : floorTexture, side: THREE.DoubleSide});
 				floorGeometry = new THREE.PlaneGeometry(100000, 100000,100,100);
 				floor = new THREE.Mesh(floorGeometry, floorMaterial);
-			  floor.side= THREE.DoubleSide;
+				floor.side = THREE.DoubleSide;
 				floor.position.y = -10;
 				floor.rotation.x = Math.PI / 2;
 				scene.add(floor);
@@ -263,9 +264,29 @@
 								zeldaMatrix.multiply(new THREE.Matrix4().makeScale(1,1,1));
 								object.position.set(0, 25.1, 0);
 								object.applyMatrix(zeldaMatrix);
-								object.rotation.y = Math.PI;
 								zelda = object;
 								scene.add(zelda);
+							}
+						);
+					}
+				);
+				var mtlLoader = new THREE.MTLLoader();
+				mtlLoader.load(
+					'flameprincess.mtl',
+					function(materials){
+						materials.preload();
+						var objLoader = new THREE.OBJLoader();
+						objLoader.setMaterials(materials);
+						objLoader.load(
+							'flameprincess.obj',
+							function(object) {
+								var fprincessMatrix = new THREE.Matrix4().makeTranslation(0,-10,0);
+								fprincessMatrix.multiply(new THREE.Matrix4().makeScale(4,4,4));
+								object.applyMatrix(fprincessMatrix);
+								object.position.set(30, -5, 0);
+								object.rotation.y = Math.PI;
+								fprincess = object;
+								scene.add(fprincess);
 							}
 						);
 					}
@@ -365,10 +386,10 @@
 				scene.add( ambientlight );
 			}
 			function onWindowResize() {
-				topCamera.aspect = window.innerWidth / window.innerHeight;
-				topCamera.updateProjectionMatrix();
-				chaseCamera.aspect = window.innerWidth / window.innerHeight;
-				chaseCamera.updateProjectionMatrix();
+				fprincessCamera.aspect = window.innerWidth / window.innerHeight;
+				fprincessCamera.updateProjectionMatrix();
+				zeldaCamera.aspect = window.innerWidth / window.innerHeight;
+				zeldaCamera.updateProjectionMatrix();
 				renderer.setSize( window.innerWidth, window.innerHeight );
 			}
 
@@ -401,19 +422,49 @@
 					zelda.rotateOnAxis( new THREE.Vector3(0,1,0), rotateAngle);
 				if ( keyboard.pressed("D") )
 					zelda.rotateOnAxis( new THREE.Vector3(0,1,0), -rotateAngle);
+				// local transformations
+				// move forwards/backwards/left/right
+				if ( keyboard.pressed("K") )
+					fprincess.translateZ( -moveDistance );
+				if ( keyboard.pressed("I") )
+					fprincess.translateZ(  moveDistance );
+				if ( keyboard.pressed("U") )
+					fprincess.translateX( moveDistance );
+				if ( keyboard.pressed("O") )
+					fprincess.translateX(  -moveDistance );
+				// rotate left/right/up/down
+				var rotation_matrix = new THREE.Matrix4().identity();
+				if ( keyboard.pressed("J") )
+					fprincess.rotateOnAxis( new THREE.Vector3(0,1,0), rotateAngle);
+				if ( keyboard.pressed("L") )
+					fprincess.rotateOnAxis( new THREE.Vector3(0,1,0), -rotateAngle);
+
+
 				if ( keyboard.pressed("Z") )
 				{
 					zelda.position.set(0,-10,0);
 					zelda.rotation.set(0,0,0);
+					fprincess.position.set(30,-5,0);
+					fprincess.rotation(0,0,0);
 				}
 
 				//muda a posição da camera que segue a zelda
-				var relativeCameraOffset = new THREE.Vector3(0,35,-130);
-				var cameraOffset = relativeCameraOffset.applyMatrix4( zelda.matrixWorld );
-				chaseCamera.position.x = cameraOffset.x;
-				chaseCamera.position.y = cameraOffset.y;
-				chaseCamera.position.z = cameraOffset.z;
-				chaseCamera.lookAt( zelda.position );
+				// posicao camera zelda
+				var relativeCameraOffset1 = new THREE.Vector3(0,10.9,-33);
+				var fprincessCameraOffset = relativeCameraOffset1.applyMatrix4( fprincess.matrixWorld );
+				fprincessCamera.position.x = fprincessCameraOffset.x;
+				fprincessCamera.position.y = fprincessCameraOffset.y;
+				fprincessCamera.position.z = fprincessCameraOffset.z;
+				fprincessCamera.lookAt( fprincess.position );
+
+
+				// posicao camera da zelda
+				var relativeCameraOffset2 = new THREE.Vector3(0,35,-100);
+				var zeldaCameraOffset = relativeCameraOffset2.applyMatrix4( zelda.matrixWorld );
+				zeldaCamera.position.x = zeldaCameraOffset.x;
+				zeldaCamera.position.y = zeldaCameraOffset.y;
+				zeldaCamera.position.z = zeldaCameraOffset.z;
+				zeldaCamera.lookAt( zelda.position );
 
 				//muda a posição da borboleta q segue a zelda
 				borboletaAux.position.x = zelda.position.x;
@@ -435,11 +486,17 @@
 				if (zelda.position.distanceTo(rubi0.position) <= 12.5 ){
 					scene.remove(rubi0);
 				}
-
+				if (fprincess.position.distanceTo(rubi0.position) <= 12.5 ){
+					scene.remove(rubi0);
+				}
 				//rubi1
+				
 				rubi1.rotation.y += rubyroda;
 				rubi1.position.y = rubysobedesce;
 				if (zelda.position.distanceTo(rubi1.position) <= 12.5 ){
+					scene.remove(rubi1);
+				}
+				if (fprincess.position.distanceTo(rubi1.position) <= 12.5 ){
 					scene.remove(rubi1);
 				}
 
@@ -454,10 +511,29 @@
 
 			}
 			function render() {
-				if(camera2ativa)
-					renderer.render( scene, chaseCamera );
+				var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+				zeldaCamera.aspect = 0.5 * SCREEN_WIDTH / SCREEN_HEIGHT;
+				fprincessCamera.aspect = 0.5 * SCREEN_WIDTH / SCREEN_HEIGHT;
+				zeldaCamera.updateProjectionMatrix();
+				fprincessCamera.updateProjectionMatrix();
+
+				// setViewport parameters:
+				//  lower_left_x, lower_left_y, viewport_width, viewport_height
+				renderer.setViewport( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT );
+				renderer.clear();
+
+				// left side
+				renderer.setViewport( 1, 1,   0.5 * SCREEN_WIDTH - 2, SCREEN_HEIGHT - 2 );
+				renderer.render( scene, zeldaCamera );
+
+				// right side
+				renderer.setViewport( 0.5 * SCREEN_WIDTH + 1, 1,   0.5 * SCREEN_WIDTH - 2, SCREEN_HEIGHT - 2 );
+				renderer.render( scene, fprincessCamera );
+
+				/*if(camera2ativa)
+					renderer.render( scene, zeldaCamera );
 				else
-					renderer.render( scene, topCamera );
+					renderer.render( scene, fprincessCamera );*/
 			}
 		</script>
 	</body>
