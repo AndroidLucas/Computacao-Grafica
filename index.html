@@ -143,7 +143,7 @@
 			var keyboard = new THREEx.KeyboardState();
 			var clock = new THREE.Clock();
 			var borboletaAux = new THREE.Object3D();
-			var rubi0, rubi1;
+			var rubi0, rubi1, rubi2, rubi3, rubi4, rubi5, rubi6, rubi8;
 			var timestamp;
 
 			init();
@@ -343,7 +343,7 @@
 	                      child.material = RubiMaterial;
 	                  }
 	              });
-								object.position.set(120, 25.1, 140);
+								object.position.set(-320, 25.1, 140);
 								object.rotation.y = Math.PI;
 								object.scale.set(0.25,0.25,0.25);
 								rubi1 = object;
@@ -352,6 +352,188 @@
 						);
 					}
 				);
+
+				//rubi2
+
+				var mtlLoader = new THREE.MTLLoader();
+				mtlLoader.load(
+					'Rubis_Zelda.mtl',
+					function(materials){
+						materials.preload();
+						var objLoader = new THREE.OBJLoader();
+						objLoader.setMaterials(materials);
+						objLoader.load(
+							'Rubis_Zelda.obj',
+							function(object) {
+								object.traverse(function (child) {
+	                  if (child instanceof THREE.Mesh) {
+	                      child.material = RubiMaterial;
+	                  }
+	              });
+								object.position.set(80, 25.1, 200);
+								object.rotation.y = Math.PI;
+								object.scale.set(0.25,0.25,0.25);
+								rubi2 = object;
+								scene.add(rubi2);
+							}
+						);
+					}
+				);
+
+				var mtlLoader = new THREE.MTLLoader();
+				mtlLoader.load(
+					'Rubis_Zelda.mtl',
+					function(materials){
+						materials.preload();
+						var objLoader = new THREE.OBJLoader();
+						objLoader.setMaterials(materials);
+						objLoader.load(
+							'Rubis_Zelda.obj',
+							function(object) {
+								object.traverse(function (child) {
+	                  if (child instanceof THREE.Mesh) {
+	                      child.material = RubiMaterial;
+	                  }
+	              });
+								object.position.set(0, 25.1, 200);
+								object.rotation.y = Math.PI;
+								object.scale.set(0.25,0.25,0.25);
+								rubi3 = object;
+								scene.add(rubi3);
+							}
+						);
+					}
+				);
+
+				var mtlLoader = new THREE.MTLLoader();
+				mtlLoader.load(
+					'Rubis_Zelda.mtl',
+					function(materials){
+						materials.preload();
+						var objLoader = new THREE.OBJLoader();
+						objLoader.setMaterials(materials);
+						objLoader.load(
+							'Rubis_Zelda.obj',
+							function(object) {
+								object.traverse(function (child) {
+	                  if (child instanceof THREE.Mesh) {
+	                      child.material = RubiMaterial;
+	                  }
+	              });
+								object.position.set(-50, 25.1, -100);
+								object.rotation.y = Math.PI;
+								object.scale.set(0.25,0.25,0.25);
+								rubi4 = object;
+								scene.add(rubi4);
+							}
+						);
+					}
+				);
+
+
+				var mtlLoader = new THREE.MTLLoader();
+				mtlLoader.load(
+					'Rubis_Zelda.mtl',
+					function(materials){
+						materials.preload();
+						var objLoader = new THREE.OBJLoader();
+						objLoader.setMaterials(materials);
+						objLoader.load(
+							'Rubis_Zelda.obj',
+							function(object) {
+								object.traverse(function (child) {
+	                  if (child instanceof THREE.Mesh) {
+	                      child.material = RubiMaterial;
+	                  }
+	              });
+								object.position.set(-150, 25.1, -200);
+								object.rotation.y = Math.PI;
+								object.scale.set(0.25,0.25,0.25);
+								rubi5 = object;
+								scene.add(rubi5);
+							}
+						);
+					}
+				);
+
+
+				var mtlLoader = new THREE.MTLLoader();
+				mtlLoader.load(
+					'Rubis_Zelda.mtl',
+					function(materials){
+						materials.preload();
+						var objLoader = new THREE.OBJLoader();
+						objLoader.setMaterials(materials);
+						objLoader.load(
+							'Rubis_Zelda.obj',
+							function(object) {
+								object.traverse(function (child) {
+	                  if (child instanceof THREE.Mesh) {
+	                      child.material = RubiMaterial;
+	                  }
+	              });
+								object.position.set(-150, 25.1, 200);
+								object.rotation.y = Math.PI;
+								object.scale.set(0.25,0.25,0.25);
+								rubi6 = object;
+								scene.add(rubi6);
+							}
+						);
+					}
+				);
+
+				var mtlLoader = new THREE.MTLLoader();
+				mtlLoader.load(
+					'Rubis_Zelda.mtl',
+					function(materials){
+						materials.preload();
+						var objLoader = new THREE.OBJLoader();
+						objLoader.setMaterials(materials);
+						objLoader.load(
+							'Rubis_Zelda.obj',
+							function(object) {
+								object.traverse(function (child) {
+	                  if (child instanceof THREE.Mesh) {
+	                      child.material = RubiMaterial;
+	                  }
+	              });
+								object.position.set(150, 25.1, -200);
+								object.rotation.y = Math.PI;
+								object.scale.set(0.25,0.25,0.25);
+								rubi7 = object;
+								scene.add(rubi7);
+							}
+						);
+					}
+				);
+
+				var mtlLoader = new THREE.MTLLoader();
+				mtlLoader.load(
+					'Rubis_Zelda.mtl',
+					function(materials){
+						materials.preload();
+						var objLoader = new THREE.OBJLoader();
+						objLoader.setMaterials(materials);
+						objLoader.load(
+							'Rubis_Zelda.obj',
+							function(object) {
+								object.traverse(function (child) {
+	                  if (child instanceof THREE.Mesh) {
+	                      child.material = RubiMaterial;
+	                  }
+	              });
+								object.position.set(250, 25.1, 200);
+								object.rotation.y = Math.PI;
+								object.scale.set(0.25,0.25,0.25);
+								rubi8 = object;
+								scene.add(rubi8);
+							}
+						);
+					}
+				);
+
+
+
 
 				//loader da borboleta da zelda
 
@@ -499,6 +681,74 @@
 				if (fprincess.position.distanceTo(rubi1.position) <= 12.5 ){
 					scene.remove(rubi1);
 				}
+
+				//rubi2
+				rubi2.rotation.y += rubyroda;
+				rubi2.position.y = rubysobedesce;
+				if (zelda.position.distanceTo(rubi2.position) <= 12.5 ){
+					scene.remove(rubi2);
+				}
+				if (fprincess.position.distanceTo(rubi2.position) <= 12.5 ){
+					scene.remove(rubi2);
+				}
+
+				//rubi3
+				rubi3.rotation.y += rubyroda;
+				rubi3.position.y = rubysobedesce;
+				if (zelda.position.distanceTo(rubi3.position) <= 12.5 ){
+					scene.remove(rubi3);
+				}
+				if (fprincess.position.distanceTo(rubi3.position) <= 12.5 ){
+					scene.remove(rubi3);
+				}
+				//rubi4
+				rubi4.rotation.y += rubyroda;
+				rubi4.position.y = rubysobedesce;
+				if (zelda.position.distanceTo(rubi4.position) <= 12.5 ){
+					scene.remove(rubi4);
+				}
+				if (fprincess.position.distanceTo(rubi4.position) <= 12.5 ){
+					scene.remove(rubi4);
+				}				
+				//rubi5
+				rubi5.rotation.y += rubyroda;
+				rubi5.position.y = rubysobedesce;
+				if (zelda.position.distanceTo(rubi5.position) <= 12.5 ){
+					scene.remove(rubi5);
+				}
+				if (fprincess.position.distanceTo(rubi5.position) <= 12.5 ){
+					scene.remove(rubi5);
+				}
+
+				//rubi6
+				rubi6.rotation.y += rubyroda;
+				rubi6.position.y = rubysobedesce;
+				if (zelda.position.distanceTo(rubi6.position) <= 12.5 ){
+					scene.remove(rubi6);
+				}
+				if (fprincess.position.distanceTo(rubi6.position) <= 12.5 ){
+					scene.remove(rubi6);
+				}
+				//rubi7
+				rubi7.rotation.y += rubyroda;
+				rubi7.position.y = rubysobedesce;
+				if (zelda.position.distanceTo(rubi7.position) <= 12.5 ){
+					scene.remove(rubi7);
+				}
+				if (fprincess.position.distanceTo(rubi7.position) <= 12.5 ){
+					scene.remove(rubi7);
+				}
+
+				//rubi8
+				rubi8.rotation.y += rubyroda;
+				rubi8.position.y = rubysobedesce;
+				if (zelda.position.distanceTo(rubi8.position) <= 12.5 ){
+					scene.remove(rubi8);
+				}
+				if (fprincess.position.distanceTo(rubi8.position) <= 12.5 ){
+					scene.remove(rubi8);
+				}
+
 
 				//cabo os rubi
 
